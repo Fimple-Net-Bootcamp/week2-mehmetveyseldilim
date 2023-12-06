@@ -14,18 +14,28 @@ namespace Weather.API.Controllers.v1
         private readonly WeatherDbContext _weatherDbContext;
         private readonly IMapper _mapper;
 
-        public WeathersController(WeatherDbContext weatherDbContext, IMapper mapper)
+        private readonly ILogger<WeathersController> _logger;  // Add logger
+
+
+        public WeathersController(WeatherDbContext weatherDbContext, 
+        IMapper mapper, 
+        ILogger<WeathersController> logger)
         {
             _weatherDbContext = weatherDbContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<ReadWeatherObject>> GetAllWeatherObjects() 
         {
+            _logger.LogInformation("HTTP GetAllWeatherObjects");
+
             var weatherObjects = _weatherDbContext.WeatherObjects.ToList();
 
             var mappedWeatherObjects = weatherObjects.Select(x => _mapper.Map<ReadWeatherObject>(x));
+
+            _logger.LogInformation("Returning a list of weather objects => {@mappedWeatherObjects}", mappedWeatherObjects);
 
             return Ok(mappedWeatherObjects);
 
