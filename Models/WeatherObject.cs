@@ -6,7 +6,7 @@ namespace Weather.API.Models
     [Keyless]
     public class WeatherObject
     {
-        public DateTime DateTime {get; set;}
+        public DateOnly Date {get; set;}
         public required string Location {get; set;}
         public int Mintemperature {get; set;}
 

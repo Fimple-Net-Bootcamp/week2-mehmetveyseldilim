@@ -4,7 +4,7 @@ namespace Weather.API.DTOs.Request
 {
     public class CreateWeatherObject
     {
-        public DateTime DateTime {get; set;}
+        public DateOnly Date {get; set;}
         public required string Location {get; set;}
         public int Mintemperature {get; set;}
 

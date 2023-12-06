@@ -13,7 +13,7 @@ namespace Weather.API.Data.DatabaseModelConfigurations
                 .ToTable(b => b.HasCheckConstraint("Weathers", "[Mintemperature] < [Maxtemperature]"));
 
             // Set a composite key using DateTime and Location
-            builder.HasKey(w => new { w.DateTime, w.Location });
+            builder.HasKey(w => new { w.Date, w.Location });
 
             // Configure properties
             builder.Property(w => w.Location)

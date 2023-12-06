@@ -2,7 +2,7 @@ namespace Weather.API.DTOs.Response
 {
     public class ReadWeatherObject 
     {
-        public DateTime DateTime {get; set;}
+        public DateOnly Date {get; set;}
         public required string Location {get; set;}
         public int Mintemperature {get; set;}
 
