@@ -9,7 +9,7 @@ namespace Weather.API.Data.DatabaseModelConfigurations
         public void Configure(EntityTypeBuilder<WeatherObject> builder)
         {
             builder
-                .ToTable("Weathers", WeatherDbContext.DEFAULT_SCHEMA)
+                // .ToTable("Weathers", WeatherDbContext.DEFAULT_SCHEMA) //! Removed because SQ lite does not support schemas
                 .ToTable(b => b.HasCheckConstraint("Weathers", "[Mintemperature] < [Maxtemperature]"));
 
             // Set a composite key using DateTime and Location
