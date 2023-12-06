@@ -17,5 +17,12 @@ namespace Weather.API.Extensions
                 options.UseSqlite(cnn);
             });
         }
+
+        public static void AddAutoMapperService(this IServiceCollection services) 
+        {
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        }
+
+        
     }
 }
