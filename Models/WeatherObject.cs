@@ -7,7 +7,7 @@ namespace Weather.API.Models
     public class WeatherObject
     {
         public DateTime DateTime {get; set;}
-        public string Location {get; set;}
+        public required string Location {get; set;}
         public int Mintemperature {get; set;}
 
         public int Maxtemperature {get; set;}
