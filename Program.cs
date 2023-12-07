@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Serilog;
 using Serilog.Extensions.Logging;
 using Weather.API.Extensions;
+using Weather.API.Utility;
 
 public class Program 
 {
@@ -10,6 +11,7 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
+        builder.Services.AddScoped<IRandomGenerator, RandomGenerator>();
         builder.Services.AddAutoMapperService();
         builder.Services.AddEfSqLiteInMemoryDb();
         builder.Services.AddControllers();
@@ -38,6 +40,8 @@ public class Program
         app.UseAuthorization();
 
         app.MapControllers();
+
+        app.Seed(hostEnvironment: app.Environment, logger: logger);
 
         app.Run();
     }

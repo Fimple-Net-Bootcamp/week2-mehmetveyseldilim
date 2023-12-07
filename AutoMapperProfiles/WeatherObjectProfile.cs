@@ -7,7 +7,6 @@ namespace Weather.API.AutoMapperProfiles
 {
     public class WeatherObjectProfile : Profile
     {
-       
         public WeatherObjectProfile()
         {
             // source => target
