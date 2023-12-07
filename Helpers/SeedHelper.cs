@@ -31,7 +31,7 @@ namespace Weather.API.Helpers
                         Mintemperature = randomGenerator.Next(-5_000, 0),
                         Maxtemperature = randomGenerator.Next(1, 5000),
                         Pressure = randomGenerator.Next(0, 1000),
-                        AirQuality = (AirQuality)randomGenerator.Next(0, 5)
+                        AirQuality = (AirQuality)randomGenerator.Next(0, 4)
                     };
 
                     weatherObjects.Add(createdObject);
