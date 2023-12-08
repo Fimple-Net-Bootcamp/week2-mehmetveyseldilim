@@ -1,6 +1,7 @@
 using System.Text.Json;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Weather.API.Data;
 using Weather.API.DTOs.Request;
 using Weather.API.DTOs.Response;
@@ -30,22 +31,6 @@ namespace Weather.API.Controllers.v1
             _mapper = mapper;
             _logger = logger;
         }
-
-        // [HttpGet]
-        // public ActionResult<IEnumerable<ReadWeatherObject>> GetAllWeatherObjects() 
-        // {
-        //     _logger.LogInformation("HTTP GetAllWeatherObjects");
-
-        //     var weatherObjects = _weatherDbContext.WeatherObjects.ToList();
-
-        //     var mappedWeatherObjects = weatherObjects.Select(x => _mapper.Map<ReadWeatherObject>(x));
-
-        //     _logger.LogInformation("Returning a list of weather objects => {@mappedWeatherObjects}", mappedWeatherObjects);
-
-        //     return Ok(mappedWeatherObjects);
-
-        // }
-
 
         [HttpGet]
         [Route("{planetName}/weather-daily")]
@@ -81,17 +66,78 @@ namespace Weather.API.Controllers.v1
 
         }
 
+        [HttpGet("{planetName}/weather/{date}", Name = "GetWeatherDataForSpecificPlanetAndDate")]
+        [ValidatePlanetName]
+        public ActionResult<ReadWeatherObject> GetWeatherDataForSpecificPlanetAndDate([FromRoute]string planetName, [FromRoute]DateOnly date) 
+        {
+            var weatherObject = GetWeatherObject(planetName, date);
+
+            var mappedWeatherObject = _mapper.Map<ReadWeatherObject>(weatherObject);
+
+            return mappedWeatherObject;
+        }
+
         [HttpPost]
-        public ActionResult<WeatherObject> CreateWeatherObject(CreateWeatherObject createWeatherObject) 
+        public IActionResult CreateWeatherObject([FromBody] CreateWeatherObject createWeatherObject) 
         {
             var weatherObjectToBeAdded = _mapper.Map<WeatherObject>(createWeatherObject);
 
             _weatherDbContext.WeatherObjects.Add(weatherObjectToBeAdded);
             _weatherDbContext.SaveChanges();
 
-            // return CreatedAtRoute(nameof(GetCommandById),new { Id = commandReadDto.Id }, commandReadDto);
+            var mappedDTO = _mapper.Map<ReadWeatherObject>(weatherObjectToBeAdded);
 
-            return weatherObjectToBeAdded;
+            string location = mappedDTO.Location;
+            string date = mappedDTO.Date.ToString("yyyy.MM.dd");
+
+            return CreatedAtRoute(nameof(GetWeatherDataForSpecificPlanetAndDate),
+            new { planetName = location, date = date }, 
+            mappedDTO);
+
+        }
+
+        [HttpPut("{planetName}/weather/{date}")]
+        [ValidatePlanetName]
+        public IActionResult UpdateWeatherObject(string planetName, 
+        DateOnly date, 
+        [FromBody] UpdateWeatherObject updateWeatherObject) 
+        {
+            var weatherObjectToBeUpdated = GetWeatherObject(planetName, date);
+
+           _mapper.Map(updateWeatherObject, weatherObjectToBeUpdated);
+           _weatherDbContext.SaveChanges();
+
+            return NoContent();
+
+        }
+
+        [HttpDelete("{planetName}/weather/{date}")]
+        [ValidatePlanetName]
+        public IActionResult DeleteWeatherObject(string planetName, DateOnly date) 
+        {
+            var weatherObjectToBeDeleted = GetWeatherObject(planetName, date);
+
+            _weatherDbContext.WeatherObjects.Remove(weatherObjectToBeDeleted);
+
+            _weatherDbContext.SaveChanges();
+
+            return NoContent();
+        }
+
+
+        private WeatherObject GetWeatherObject(string planetName, DateOnly date) 
+        {
+             var weatherObject = _weatherDbContext
+                                .WeatherObjects
+                                .Where(w => EF.Functions.Collate(w.Location, "NOCASE").Equals(planetName) && w.Date == date)
+                                .SingleOrDefault();
+
+            if(weatherObject is null) 
+            {
+                throw new WeatherNotFound($"No weather data recorded for this date: {date}");
+            }
+
+            return weatherObject;
         }
     }
 }

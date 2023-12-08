@@ -23,6 +23,8 @@ namespace Weather.API.AutoMapperProfiles
                 opt.MapFrom(src => Enum.Parse<AirQuality>(src.AirQuality,true)));
             // .ForMember(dest => dest.Date, opt => 
             //     opt.MapFrom(src => src.Date));
+
+            CreateMap<UpdateWeatherObject, WeatherObject>().ReverseMap();
         }
         
         // CreateMap<CommandCreateDto, Command>();
