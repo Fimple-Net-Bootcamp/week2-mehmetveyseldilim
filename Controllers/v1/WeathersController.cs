@@ -50,7 +50,7 @@ namespace Weather.API.Controllers.v1
         [HttpGet]
         [Route("{planetName}/weather-daily")]
         [ValidatePlanetName]
-        public ActionResult<PagedList<ReadWeatherObject>> GetDailyWeatherDataForSinglePlanet(
+        public ActionResult<IEnumerable<ReadWeatherObject>> GetDailyWeatherDataForSinglePlanet(
             string planetName, 
             [FromQuery] WeatherParameters weatherParameters) 
         {
@@ -63,29 +63,23 @@ namespace Weather.API.Controllers.v1
 
             var weatherObjects = _weatherDbContext.WeatherObjects
                                 .FilterWeathersByLocation(planetName)
+                                .FilterWeathersByDate(weatherParameters.BeginningDate, weatherParameters.EndingDate)
                                 .FilterWeathersByTemperature(weatherParameters.MinTemperature, weatherParameters.MaxTemperature)
                                 .FilterWeathersByAirQuality(weatherParameters.AirQuality)
                                 .Sort(weatherParameters.OrderBy!)
-                                .ToList(); 
+                                .AsQueryable(); 
 
-            // if(weatherParameters.AirQuality.HasValue) 
-            // {
-            //     weatherObjects = weatherObjects.Where(x => x.AirQuality == weatherParameters.AirQuality.Value);
-            // }
 
-            var mappedWeatherObjects = weatherObjects.Select(x => _mapper.Map<ReadWeatherObject>(x));
-
-            _logger.LogInformation("Returning a list of weather objects => {@mappedWeatherObjects}", mappedWeatherObjects);
-
-            var pagedResult = PagedList<ReadWeatherObject>.ToPagedList(mappedWeatherObjects, weatherParameters.PageNumber, weatherParameters.PageSize);
-
+            var pagedResult = PagedList<WeatherObject>.ToPagedList(weatherObjects, weatherParameters.PageNumber, weatherParameters.PageSize);
             Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagedResult.MetaData));
-            return Ok(pagedResult);
+            var mappedPagedResult = pagedResult.Select(x => _mapper.Map<ReadWeatherObject>(x)); 
+
+             _logger.LogInformation("Returning a list of weather objects => {@mappedWeatherObjects}", mappedPagedResult);
+
+            return Ok(mappedPagedResult);
 
 
         }
-
-        
 
         [HttpPost]
         public ActionResult<WeatherObject> CreateWeatherObject(CreateWeatherObject createWeatherObject) 

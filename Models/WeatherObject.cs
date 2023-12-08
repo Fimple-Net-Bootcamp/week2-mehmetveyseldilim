@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Weather.API.Models 
 {
-    [Keyless]
     public class WeatherObject
     {
         public DateOnly Date {get; set;}

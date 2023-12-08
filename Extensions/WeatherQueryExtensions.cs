@@ -32,10 +32,24 @@ namespace Weather.API.Extensions
             return weathers.OrderBy(orderQuery);
         }
 
+
+
         public static IQueryable<WeatherObject> FilterWeathersByAirQuality(
-            this IQueryable<WeatherObject> weathers, AirQuality airQuality)
+            this IQueryable<WeatherObject> weathers, AirQuality? airQuality)
         {
+            if(airQuality is null) 
+            {
+                return weathers;
+            }
             return weathers.Where(e => e.AirQuality == airQuality);
         }
+
+        public static IQueryable<WeatherObject> FilterWeathersByDate(this IQueryable<WeatherObject> weathers,
+        DateOnly startingDate, 
+        DateOnly endingDate) 
+        {
+            return weathers.Where(w => w.Date <= endingDate && w.Date >= startingDate);
+        }
+
     }
 }
